@@ -2,243 +2,331 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Seed13 Productions Gallery</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minimalist Portfolio Gallery</title>
   <style>
-    body { font-family: 'Segoe UI', Arial, sans-serif; background: #181818; color: #eee; margin: 0; }
-    header { background: #222; padding: 1.5rem 0; text-align: center; }
-    header h1 { margin: 0; font-size: 2.2rem; letter-spacing: 2px; }
+    :root {
+      --bg: #fff;
+      --fg: #111;
+      --accent: #0070f3;
+      --thumb-size: 120px;
+      --gap: 1.5rem;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'Inter', Arial, sans-serif;
+      min-height: 100vh;
+    }
+    header {
+      padding: 1.5rem 0 1rem 0;
+      text-align: center;
+      font-size: 2rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
     .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 18px;
-      padding: 2rem;
-      max-width: 1200px;
-      margin: auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: var(--gap);
+      margin: 2rem auto;
+      max-width: 900px;
     }
     .thumb {
-      background: #222;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 2px 8px #0008;
+      width: var(--thumb-size);
+      height: 180px;
+      object-fit: cover;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
       cursor: pointer;
-      transition: transform 0.15s, box-shadow 0.15s;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      user-select: none;
+      pointer-events: auto;
+      transition: box-shadow 0.2s;
+      -webkit-user-drag: none;
     }
     .thumb:hover {
-      transform: translateY(-4px) scale(1.03);
-      box-shadow: 0 6px 24px #000a;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.13);
     }
-    .thumb img {
-      width: 100%;
-      height: 140px;
-      object-fit: cover;
-      display: block;
-      background: #111;
-    }
-    .caption {
-      font-size: 0.95rem;
-      color: #ccc;
-      padding: 0.5rem 0.7rem 0.7rem 0.7rem;
-      text-align: center;
-      word-break: break-word;
-    }
-    /* Lightbox styles */
-    .lightbox {
+    .modal {
       display: none;
       position: fixed;
       z-index: 1000;
-      top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(0,0,0,0.93);
+      left: 0; top: 0; right: 0; bottom: 0;
+      background: rgba(255,255,255,0.97);
       align-items: center;
       justify-content: center;
       flex-direction: column;
       transition: background 0.2s;
     }
-    .lightbox.active { display: flex; }
-    .lightbox img {
-      max-width: 92vw;
+    .modal.active {
+      display: flex;
+    }
+    .modal-img {
       max-height: 80vh;
-      border-radius: 10px;
-      box-shadow: 0 0 32px #000c;
-      background: #222;
-    }
-    .lightbox .caption {
-      color: #fff;
-      margin-top: 1.2rem;
-      font-size: 1.1rem;
-      background: rgba(0,0,0,0.4);
-      border-radius: 6px;
-      padding: 0.5rem 1.2rem;
       max-width: 90vw;
+      border-radius: 10px;
+      box-shadow: 0 6px 32px rgba(0,0,0,0.18);
+      pointer-events: none;
+      -webkit-user-drag: none;
+      user-select: none;
     }
-    .lightbox .close, .lightbox .nav {
-      position: absolute;
+    .modal-nav {
+      margin-top: 1.5rem;
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+    .modal-btn {
+      background: var(--accent);
       color: #fff;
-      font-size: 2.5rem;
-      background: rgba(0,0,0,0.3);
       border: none;
-      border-radius: 50%;
-      width: 2.5rem; height: 2.5rem;
-      display: flex; align-items: center; justify-content: center;
+      border-radius: 4px;
+      padding: 0.6em 1.2em;
+      font-size: 1rem;
       cursor: pointer;
-      top: 2.5rem;
-      transition: background 0.2s;
+      transition: background 0.15s;
+    }
+    .modal-btn:hover {
+      background: #005bb5;
+    }
+    .close-btn {
+      position: absolute;
+      top: 2rem;
+      right: 2rem;
+      background: none;
+      border: none;
+      font-size: 2rem;
+      color: var(--fg);
+      cursor: pointer;
       z-index: 1100;
     }
-    .lightbox .close { right: 2.5rem; }
-    .lightbox .nav.left { left: 2.5rem; top: 50%; transform: translateY(-50%); }
-    .lightbox .nav.right { right: 2.5rem; top: 50%; transform: translateY(-50%); }
-    /* Footer styles */
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 2rem 0 1rem 0;
+      gap: 0.7rem;
+    }
+    input[type="email"] {
+      padding: 0.7em 1em;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1rem;
+      width: 220px;
+    }
+    button[type="submit"] {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 0.6em 1.2em;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button[type="submit"]:hover {
+      background: #005bb5;
+    }
+    .stripe-links {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin: 2rem 0 1rem 0;
+    }
+    .stripe-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 1.1rem;
+      border-bottom: 1px solid var(--accent);
+      transition: color 0.15s;
+    }
+    .stripe-link:hover {
+      color: #005bb5;
+    }
     footer {
-      background: #222;
+      margin-top: 3rem;
       padding: 2rem 0;
       text-align: center;
-      margin-top: 3rem;
+      background: #f8f9fa;
+      border-top: 1px solid #e9ecef;
     }
-    footer .logo {
-      max-width: 140px;
+    .footer-logo {
+      max-width: 120px;
+      height: auto;
       margin-bottom: 1rem;
       border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-    footer p {
+    .copyright {
       font-size: 0.9rem;
-      color: #999;
+      color: #666;
       margin: 0.5rem 0;
     }
-    
     @media (max-width: 600px) {
-      .gallery { padding: 0.5rem; gap: 8px; }
-      .thumb img { height: 80px; }
-      .lightbox img { max-width: 98vw; max-height: 60vh; }
-      .lightbox .close, .lightbox .nav { font-size: 2rem; width: 2rem; height: 2rem; }
-      footer .logo { max-width: 100px; }
+      .gallery {
+        gap: 0.7rem;
+      }
+      .thumb {
+        width: 90px;
+        height: 120px;
+      }
+      .modal-img {
+        max-width: 98vw;
+        max-height: 60vh;
+      }
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Seed13 Productions Gallery</h1>
-  </header>
-  <main>
-    <div class="gallery" id="gallery">
-      <!-- Thumbnails will be inserted here by JS -->
-    </div>
-  </main>
-  <div class="lightbox" id="lightbox">
-    <button class="close" title="Close">&times;</button>
-    <button class="nav left" title="Previous">&#8592;</button>
-    <img src="" alt="Full Image">
-    <div class="caption"></div>
-    <button class="nav right" title="Next">&#8594;</button>
+  <header>My Portfolio Gallery</header>
+  <div class="gallery" id="gallery">
+    <!-- Thumbnails will be injected here -->
   </div>
+
+  <form id="emailForm" autocomplete="off">
+    <label for="email">Join the mailing list:</label>
+    <input type="email" id="email" name="email" placeholder="your@email.com" required>
+    <button type="submit">Subscribe</button>
+    <div id="emailMsg" style="font-size:0.95em;color:var(--accent);"></div>
+  </form>
+
+  <div class="stripe-links">
+    <a class="stripe-link" href="https://buy.stripe.com/test_123" target="_blank" rel="noopener">Buy Print</a>
+    <a class="stripe-link" href="https://buy.stripe.com/test_456" target="_blank" rel="noopener">Donate</a>
+  </div>
+
+  <!-- Modal for full image view -->
+  <div class="modal" id="modal">
+    <button class="close-btn" id="closeModal" aria-label="Close">&times;</button>
+    <img class="modal-img" id="modalImg" src="" alt="Artwork" draggable="false">
+    <div class="modal-nav">
+      <button class="modal-btn" id="prevBtn">Previous</button>
+      <button class="modal-btn" id="nextBtn">Next</button>
+      <button class="modal-btn" id="homeBtn">Home</button>
+    </div>
+  </div>
+
   <script>
-    // List your image filenames here (Images folder for full images, thumbnails folder for thumbs)
+    // --- Image Data ---
     const images = [
-      // Format: ["Images/filename.png", "thumbnails/filename.png"]
-      ["Images/A_beautiful_Asian_girl_wearing_a_white_shirt_01.png", "thumbnails/A_beautiful_Asian_girl_wearing_a_white_shirt_01.png"],
-      ["Images/A_beautiful_Asian_girl_wearing_a_white_shirt_02.png", "thumbnails/A_beautiful_Asian_girl_wearing_a_white_shirt_02.png"],
-      ["Images/A_beautiful_Asian_girl_wearing_a_white_shirt_03.png", "thumbnails/A_beautiful_Asian_girl_wearing_a_white_shirt_03.png"],
-      ["Images/antique_brass_orrery_01.png", "thumbnails/antique_brass_orrery_01.png"],
-      ["Images/antique_brass_orrery_02.png", "thumbnails/antique_brass_orrery_02.png"],
-      ["Images/antique_brass_orrery_03.png", "thumbnails/antique_brass_orrery_03.png"],
-      ["Images/asymmetrical_fashion_editorial_1.png", "thumbnails/asymmetrical_fashion_editorial_1.png"],
-      ["Images/confident_woman_black_outfit.png", "thumbnails/confident_woman_black_outfit.png"],
-      ["Images/dandelion_sunset_barbed_wire.png", "thumbnails/dandelion_sunset_barbed_wire.png"],
-      ["Images/dragon_eye_cityscape.png", "thumbnails/dragon_eye_cityscape.png"],
-      ["Images/elegant_mermaid_on_beach.png", "thumbnails/elegant_mermaid_on_beach.png"],
-      ["Images/elegant_woman_with_gun.png", "thumbnails/elegant_woman_with_gun.png"],
-      ["Images/ethereal_oceanic_sculpture.png", "thumbnails/ethereal_oceanic_sculpture.png"],
-      ["Images/evolution_of_hipster_style.png", "thumbnails/evolution_of_hipster_style.png"],
-      ["Images/fantasy_warrior_inferno.png", "thumbnails/fantasy_warrior_inferno.png"],
-      ["Images/fantasy_warrior_princess.png", "thumbnails/fantasy_warrior_princess.png"],
-      ["Images/fiery_elegance_on_beach.png", "thumbnails/fiery_elegance_on_beach.png"],
-      ["Images/fiery_mermaid_on_rock.png", "thumbnails/fiery_mermaid_on_rock.png"],
-      ["Images/fiery_siren_inferno.png", "thumbnails/fiery_siren_inferno.png"],
-      ["Images/futuristic_fashion_model_on_stairs.png", "thumbnails/futuristic_fashion_model_on_stairs.png"],
-      ["Images/magical_duel_on_hilltop.png", "thumbnails/magical_duel_on_hilltop.png"],
-      ["Images/magical_duel_street.png", "thumbnails/magical_duel_street.png"],
-      ["Images/shadow_art_on_wall.png", "thumbnails/shadow_art_on_wall.png"],
-      ["Images/shadows_on_wall_interaction.png", "thumbnails/shadows_on_wall_interaction.png"],
-      ["Images/stylish_woman_in_black_and_pink_outfit.png", "thumbnails/stylish_woman_in_black_and_pink_outfit.png"],
-      ["Images/witch_and_sorceress_duel.png", "thumbnails/witch_and_sorceress_duel.png"],
-      ["Images/witch_sorceress_duel.png", "thumbnails/witch_sorceress_duel.png"],
-      ["Images/woman_with_freckles_and_blue_eyes.png", "thumbnails/woman_with_freckles_and_blue_eyes.png"],
-      ["Images/woman_with_freckles_and_blue_eyes1.png", "thumbnails/woman_with_freckles_and_blue_eyes1.png"]
+      { thumb: "thumbnails/A_beautiful_Asian_girl_wearing_a_white_shirt_01.png", full: "Images/A_beautiful_Asian_girl_wearing_a_white_shirt_01.png" },
+      { thumb: "thumbnails/A_beautiful_Asian_girl_wearing_a_white_shirt_02.png", full: "Images/A_beautiful_Asian_girl_wearing_a_white_shirt_02.png" },
+      { thumb: "thumbnails/A_beautiful_Asian_girl_wearing_a_white_shirt_03.png", full: "Images/A_beautiful_Asian_girl_wearing_a_white_shirt_03.png" },
+      { thumb: "thumbnails/antique_brass_orrery_01.png", full: "Images/antique_brass_orrery_01.png" },
+      { thumb: "thumbnails/antique_brass_orrery_02.png", full: "Images/antique_brass_orrery_02.png" },
+      { thumb: "thumbnails/antique_brass_orrery_03.png", full: "Images/antique_brass_orrery_03.png" },
+      { thumb: "thumbnails/asymmetrical_fashion_editorial_1.png", full: "Images/asymmetrical_fashion_editorial_1.png" },
+      { thumb: "thumbnails/confident_woman_black_outfit.png", full: "Images/confident_woman_black_outfit.png" },
+      { thumb: "thumbnails/dandelion_sunset_barbed_wire.png", full: "Images/dandelion_sunset_barbed_wire.png" },
+      { thumb: "thumbnails/dragon_eye_cityscape.png", full: "Images/dragon_eye_cityscape.png" },
+      { thumb: "thumbnails/elegant_mermaid_on_beach.png", full: "Images/elegant_mermaid_on_beach.png" },
+      { thumb: "thumbnails/elegant_woman_with_gun.png", full: "Images/elegant_woman_with_gun.png" },
+      { thumb: "thumbnails/ethereal_oceanic_sculpture.png", full: "Images/ethereal_oceanic_sculpture.png" },
+      { thumb: "thumbnails/evolution_of_hipster_style.png", full: "Images/evolution_of_hipster_style.png" },
+      { thumb: "thumbnails/fantasy_warrior_inferno.png", full: "Images/fantasy_warrior_inferno.png" },
+      { thumb: "thumbnails/fantasy_warrior_princess.png", full: "Images/fantasy_warrior_princess.png" },
+      { thumb: "thumbnails/fiery_elegance_on_beach.png", full: "Images/fiery_elegance_on_beach.png" },
+      { thumb: "thumbnails/fiery_mermaid_on_rock.png", full: "Images/fiery_mermaid_on_rock.png" },
+      { thumb: "thumbnails/fiery_siren_inferno.png", full: "Images/fiery_siren_inferno.png" },
+      { thumb: "thumbnails/futuristic_fashion_model_on_stairs.png", full: "Images/futuristic_fashion_model_on_stairs.png" },
+      { thumb: "thumbnails/magical_duel_on_hilltop.png", full: "Images/magical_duel_on_hilltop.png" },
+      { thumb: "thumbnails/magical_duel_street.png", full: "Images/magical_duel_street.png" },
+      { thumb: "thumbnails/shadow_art_on_wall.png", full: "Images/shadow_art_on_wall.png" },
+      { thumb: "thumbnails/shadows_on_wall_interaction.png", full: "Images/shadows_on_wall_interaction.png" },
+      { thumb: "thumbnails/stylish_woman_in_black_and_pink_outfit.png", full: "Images/stylish_woman_in_black_and_pink_outfit.png" },
+      { thumb: "thumbnails/witch_and_sorceress_duel.png", full: "Images/witch_and_sorceress_duel.png" },
+      { thumb: "thumbnails/witch_sorceress_duel.png", full: "Images/witch_sorceress_duel.png" },
+      { thumb: "thumbnails/woman_with_freckles_and_blue_eyes.png", full: "Images/woman_with_freckles_and_blue_eyes.png" },
+      { thumb: "thumbnails/woman_with_freckles_and_blue_eyes1.png", full: "Images/woman_with_freckles_and_blue_eyes1.png" }
     ];
 
-    // Utility: make a readable caption from filename
-    function makeCaption(filename) {
-      return filename
-        .split('/').pop() // Get just the filename, not the path
-        .replace(/\.png$/i, '') // Remove extension
-        .replace(/_/g, ' ') // Replace underscores with spaces
-        .replace(/\b\w/g, c => c.toUpperCase()); // Capitalize first letter of each word
-    }
-
-    // Build gallery
+    // --- Gallery Rendering ---
     const gallery = document.getElementById('gallery');
-    images.forEach(([full, thumb], idx) => {
-      const div = document.createElement('div');
-      div.className = 'thumb';
-      div.innerHTML = `
-        <img src="${thumb}" alt="${makeCaption(full)}" data-idx="${idx}">
-        <div class="caption">${makeCaption(full)}</div>
-      `;
-      div.onclick = () => openLightbox(idx);
-      gallery.appendChild(div);
+    images.forEach((img, idx) => {
+      const el = document.createElement('img');
+      el.src = img.thumb;
+      el.alt = `Artwork ${idx+1}`;
+      el.className = 'thumb';
+      el.tabIndex = 0;
+      el.setAttribute('draggable', 'false');
+      el.addEventListener('click', () => openModal(idx));
+      el.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') openModal(idx);
+      });
+      gallery.appendChild(el);
     });
 
-    // Lightbox logic
-    const lightbox = document.getElementById('lightbox');
-    const lightboxImg = lightbox.querySelector('img');
-    const lightboxCaption = lightbox.querySelector('.caption');
-    const closeBtn = lightbox.querySelector('.close');
-    const navLeft = lightbox.querySelector('.nav.left');
-    const navRight = lightbox.querySelector('.nav.right');
-    let current = 0;
-
-    function openLightbox(idx) {
-      current = idx;
-      lightboxImg.src = images[current][0];
-      lightboxCaption.textContent = makeCaption(images[current][0]);
-      lightbox.classList.add('active');
+    // --- Modal Logic ---
+    const modal = document.getElementById('modal');
+    const modalImg = document.getElementById('modalImg');
+    let currentIdx = 0;
+    function openModal(idx) {
+      currentIdx = idx;
+      modalImg.src = images[idx].full;
+      modalImg.alt = `Artwork ${idx+1}`;
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
     }
-    function closeLightbox() {
-      lightbox.classList.remove('active');
-      lightboxImg.src = '';
+    function closeModal() {
+      modal.classList.remove('active');
+      modalImg.src = '';
+      document.body.style.overflow = '';
     }
     function showPrev() {
-      current = (current - 1 + images.length) % images.length;
-      openLightbox(current);
+      if (currentIdx > 0) openModal(currentIdx - 1);
     }
     function showNext() {
-      current = (current + 1) % images.length;
-      openLightbox(current);
+      if (currentIdx < images.length - 1) openModal(currentIdx + 1);
     }
-    closeBtn.onclick = closeLightbox;
-    navLeft.onclick = showPrev;
-    navRight.onclick = showNext;
-    // Keyboard navigation
+    document.getElementById('closeModal').onclick = closeModal;
+    document.getElementById('prevBtn').onclick = showPrev;
+    document.getElementById('nextBtn').onclick = showNext;
+    document.getElementById('homeBtn').onclick = closeModal;
+    modal.addEventListener('click', e => {
+      if (e.target === modal) closeModal();
+    });
     document.addEventListener('keydown', e => {
-      if (!lightbox.classList.contains('active')) return;
-      if (e.key === 'Escape') closeLightbox();
+      if (!modal.classList.contains('active')) return;
+      if (e.key === 'Escape') closeModal();
       if (e.key === 'ArrowLeft') showPrev();
       if (e.key === 'ArrowRight') showNext();
     });
-    // Click outside image closes
-    lightbox.addEventListener('click', e => {
-      if (e.target === lightbox) closeLightbox();
+
+    // --- Prevent Image Download (basic) ---
+    document.addEventListener('contextmenu', function(e) {
+      if (e.target.classList.contains('thumb') || e.target.classList.contains('modal-img')) {
+        e.preventDefault();
+      }
     });
+    // Prevent drag
+    document.querySelectorAll('img').forEach(img => {
+      img.setAttribute('draggable', 'false');
+    });
+
+    // --- Email Collection (demo only) ---
+    const emailForm = document.getElementById('emailForm');
+    const emailMsg = document.getElementById('emailMsg');
+    emailForm.onsubmit = async e => {
+      e.preventDefault();
+      const email = emailForm.email.value.trim();
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+        emailMsg.textContent = 'Please enter a valid email.';
+        return;
+      }
+      emailMsg.textContent = 'Thank you! You will receive a welcome email.';
+      emailForm.reset();
+      // TODO: Integrate with backend/email service for real email collection and welcome email
+    };
   </script>
-  
+
   <footer>
-    <img src="Seed_13_logo_02.jpg" alt="Seed13 Productions" class="logo">
-    <p>&copy; 2025 Seed13 Productions</p>
-    <p>Creating distinctive visual experiences</p>
+    <img src="Seed_13_logo_02.jpg" alt="Seed13 Productions" class="footer-logo">
+    <p class="copyright">&copy; 2025 Seed13 Productions</p>
+    <p class="copyright">Creating distinctive visual experiences</p>
   </footer>
 </body>
 </html>
